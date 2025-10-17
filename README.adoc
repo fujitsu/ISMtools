@@ -2,7 +2,7 @@
 :email: Juergen.Orth@Fujitsu.com
 :maintainer: Justin Langosch
 :email2: justin.langosch@fujitsu.com 
-:version: v1.0.15
+:version: v1.0.16
 
 :imagesdir: img/
 :toc: preamble
@@ -35,6 +35,7 @@ IMPORTANT: *#Please note: This toolset is provided W/O ANY WARRANTY and is to be
 [cols="5%,10%,65%,20%"]
 |=================
 |Version|Date|Description|Author
+|1.0.16|2025-07-24|* New command `ism_get_power_consumption` to get overview about power consumption of all nodes (thanks to mailto:michael.ahn@fujitsu.com[Michael Ahn])|mailto:{email2}[{maintainer}]
 |1.0.15|2025-06-27|* New command `ism_list_cpu_mem` to list cpu and memory sockets of multiple servers in csv format (thanks to mailto:Gerald.Rausch@Fujitsu.com[Gerald Rausch])|mailto:{email2}[{maintainer}]
 |1.0.14|2025-06-27|* New command `ism_get_co2data` for download of CO2 data from Sustainability Monitor (thanks to mailto:michael.ahn@fujitsu.com[Michael Ahn])|mailto:{email2}[{maintainer}]
 |1.0.13|2023-05-09|+ Updated Readme for readability |mailto:{email2}[{maintainer}]
@@ -187,6 +188,9 @@ Gets the power status of a node.
 
 * <<ism_set_power>> +
 Sets the power status of a node.
+
+* <<ism_get_power_consumption>> +
+Gets overview about power consumption of all nodes.
 
 * <<ism_add_server>> +
 Registers servers listed in given input file.
@@ -843,6 +847,35 @@ On
 
 <1> Read the current power status
 <2> Change the power status
+
+[[ism_get_power_consumption]]
+==== `ism_get_power_consumption [<# of days> [csv]]`
+Get minimum, maximum and average power consumption from all nodes over the last 30 days (default) or the number of days specified in the first parameter. If you add `csv` as second parameter, ouput will be in CSV format instead of a table. Nodes with no power consumption monitoring or nodes in maintenance mode will show all values as n/a in table output and are omitted in the CSV output.
+
+[source,indent=8]
+----
+$ ism_get_power_consumption
+
+ =========== Server Power for last  30 days ==========
+|                      Node Name | PMin | PMax | PAvg |
+ -----------------------------------------------------
+|               XF3070_NVMe_M7_1 | 200W | 340W | 273W |
+|               XF3070_NVMe_M7_2 | 250W | 310W | 261W |
+|               XF3070_NVMe_M7_3 | 270W | 330W | 278W |
+|               XF3070_NVMe_M7_4 | 250W | 320W | 262W |
+|                     dn165_mapr |  n/a |  n/a |  n/a |
+|                     dn166_mapr |  12W | 300W |  88W |
+|                     dn167_mapr |  12W | 252W |  67W |
+ -----------------------------------------------------
+
+$ ism_get_power_consumption 30 csv
+XF3070_NVMe_M7_1,200,340,273
+XF3070_NVMe_M7_2,250,310,261
+XF3070_NVMe_M7_3,270,330,278
+XF3070_NVMe_M7_4,250,320,262
+dn166_mapr,12,300,88
+dn167_mapr,12,252,67
+----
 
 [[ism_add_server]]
 ==== `ism_add_server [<inputfile>]`

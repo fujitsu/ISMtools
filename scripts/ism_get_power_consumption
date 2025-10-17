@@ -1,0 +1,93 @@
+#!/bin/bash
+# (c) Michael Ahn
+# $Id$
+# for documentation see https://github.com/fujitsu/ISMtools
+#
+# ism_get_power_lastmonth: get minimum, maximum and average power consumption of all nodes for the last 30 days
+#
+
+. ${0%/*}/.ism_env
+
+CheckJQ
+
+# First parameter is number of days before today. Default: 30
+days=${1:-30}
+
+# If second parameter is csv or json, output will be in CSV or JSON format
+[ "$2" = "csv" ] && csv=1
+[ "$2" = "json" ] && json=1
+
+# If other metric, node type or time range is needed, it can be set here
+metric="Node PowerConsumption" 
+start_date=$(date -u -d "$days days ago" +"%Y-%m-%dT%H:%M:%SZ")
+end_date=$(date -u -d "now" +"%Y-%m-%dT%H:%M:%SZ")
+
+tf=`jq -rn --arg x $start_date '$x|@uri'`
+tt=`jq -rn --arg x $end_date '$x|@uri'`
+
+KEEPSESSION=false
+[ "$ISM_session" ] && KEEPSESSION=true || eval $(ism_login)
+
+if [ -n "$csv" ]
+then
+  echo "Node Name,PMin,PMax,PAvg"
+elif [ -n "$json" ]
+then
+  echo -n "["
+else
+  echo
+   printf " =========== Server Power for last %3d days ==========\n" $days
+  printf "| %30s | PMin | PMax | PAvg |\n" "Node Name"
+  echo " -----------------------------------------------------"
+fi
+
+ism_cmd get "nodes" | jq -j '.IsmBody.Nodes[]|.Name,"/",.NodeId,"\n"' | sort |
+while read nameid
+do
+  IFS=/ read -r name id <<< $nameid
+  ItemId=$(ism_cmd get "nodes/monitor/items?NodeId=$id" |\
+    jq -r ".IsmBody.Items[]|
+      select(.ItemName==\"$metric\" and .IsActive==\"Enabled\")|.ItemId")
+  data=$(ism_cmd get "/nodes/monitor/items/${ItemId}/history?TimeFrom=$tf&TimeTill=$tt" 2>/dev/null)
+
+  # data may be empty, e.g., if node is in maintenance mode
+  if [ -n "$(echo $data | jq '.IsmBody.Records[]')" ]
+  then
+    avg=$(echo $data | jq "[ .IsmBody.Records[].Value | tonumber ] | add / length | round")
+    min=$(echo $data | jq "[ .IsmBody.Records[].Value | tonumber ] | min | round")
+    max=$(echo $data | jq "[ .IsmBody.Records[].Value | tonumber ] | max | round")
+    if [ -n "$csv" ]
+    then
+      echo "$name,$min,$max,$avg"
+    elif [ -n "$json" ]
+    then
+      [ -n "$notfirst" ] && echo "," 
+      printf '{"name":"%s","min":"%s","max":"%s","avg":"%s"}' "$name" $min $max $avg
+    else
+      printf "| %30s | %3dW | %3dW | %3dW |\n" "$name" $min $max $avg 
+    fi  
+  else
+    if [ -z "$csv" ]
+    then
+      printf "| %30s | %4s | %4s | %4s |\n" "$name" "n/a"  "n/a" "n/a" 
+    fi
+  fi
+  notfirst="x"
+done
+
+if [ -z "$csv" ] && [ -z "$json" ]
+then
+  echo " -----------------------------------------------------"
+  echo
+fi
+
+if [ -n "$json" ]
+then
+  echo "]"
+fi
+
+if [ $KEEPSESSION == false ]
+then
+        eval $(ism_logout)
+fi
+
