@@ -35,6 +35,7 @@ IMPORTANT: *#Please note: This toolset is provided W/O ANY WARRANTY and is to be
 [cols="5%,10%,65%,20%"]
 |=================
 |Version|Date|Description|Author
+|1.0.16a|2026-01-22|- Documentation changed to Fsas Technologies branding |mailto:{email2}[{maintainer}]
 |1.0.16|2025-07-24|* New command `ism_get_power_consumption` to get overview about power consumption of all nodes (thanks to mailto:michael.ahn@Fujitsu.com[Michael Ahn])|mailto:{email2}[{maintainer}]
 |1.0.15|2025-06-27|* New command `ism_list_cpu_mem` to list cpu and memory sockets of multiple servers in csv format (thanks to mailto:Gerald.Rausch@Fujitsu.com[Gerald Rausch])|mailto:{email2}[{maintainer}]
 |1.0.14|2025-06-27|* New command `ism_get_co2data` for download of CO2 data from Sustainability Monitor (thanks to mailto:michael.ahn@Fujitsu.com[Michael Ahn])|mailto:{email2}[{maintainer}]
