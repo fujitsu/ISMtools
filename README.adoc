@@ -17,7 +17,7 @@ endif::[]
 = ISMtools {version}
 
 [.lead]
-*Automation tools for https://www.fujitsu.com/de/products/computing/servers/infrastructure-management/[Fujitsu Software Infrastructure Manager (ISM)] using REST API.*
+*Automation tools for https://eu.fsastech.com/eu/products-services/primergy-servers/infrastructure-manager-ism/ [Software Infrastructure Manager (ISM)] using REST API.*
 
 These are some scripts/examples to automate tasks regarding ISM. Of course there are much more things possible. But you can use this toolset as a platform for own extensions.
 
